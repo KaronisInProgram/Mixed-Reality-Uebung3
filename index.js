@@ -1,16 +1,15 @@
 
-AFRAME.registerComponent('spinn', {
+AFRAME.registerComponent('log', {
     schema: {
-      bar: {type: 'number'},
-      baz: {type: 'string'}
+      message: {type: 'string'}
     },
   
     init: function () {
-      // Do something when component first attached.
+        console.log(this.data.message + " -> from " + this.el.localName);
     },
   
     update: function () {
-      // Do something when component's data is updated.
+      console.log("Updated -> from " + this.el.localName);
     },
   
     remove: function () {
