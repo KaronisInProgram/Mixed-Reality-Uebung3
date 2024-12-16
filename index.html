@@ -13,7 +13,7 @@
 
   <body>
     <a-scene stats xr-mode-ui="XRMode: xr"
-              webxr="requiredFeatures: hit-test,local-floor;"
+              webxr="requiredFeatures: hit-test,local-floor; optionalFeatures: unbounded;"
               ar-hit-test="target:#test;">
 
         <a-entity laser-controls="hand: left" raycaster="lineColor: blue; lineOpacity: 0.5"></a-entity>
