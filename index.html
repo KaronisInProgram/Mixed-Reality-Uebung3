@@ -10,10 +10,10 @@
     <script src="https://unpkg.com/aframe-environment-component/dist/aframe-environment-component.min.js"></script>
     <script src="index.js"></script>
 </head>
-
-  </head>
   <body>
-    <a-scene stats xr-mode-ui="XRMode: xr">
+    <a-scene stats xr-mode-ui="XRMode: xr"
+              webxr="requiredFeatures: hit-test;"
+              ar-hit-test="target:#test;">
 
         <a-assets>
             <img id="boxTexture" src="https://i.imgur.com/mYmmbrp.jpg" crossorigin="anonymous">
