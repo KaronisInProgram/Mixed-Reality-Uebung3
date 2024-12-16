@@ -14,7 +14,7 @@
   </head>
   <body>
     <a-scene stats xr-mode-ui="XRMode: xr"
-              webxr="requiredFeatures: local,hit-test,anchors;"
+              webxr="requiredFeatures: hit-test;"
               ar-hit-test="target:#test;">
 
         <a-assets>
@@ -42,7 +42,7 @@
         <a-light type="directional" light="castShadow:true;" position="5 20 -5" intensity="0.8"></a-light>
         
         <!-- Out of the box environment! -->
-        <a-entity environment="preset: forest; dressingAmount: 250" shadow="receive: true"></a-entity>
+        <a-entity environment="preset: forest; dressingAmount: 20" shadow="receive: true"></a-entity>
 
         <!-- Camera Configuration -->
         <a-entity id="rig" position="1 0 -1.75" rotation="0 35 0">
