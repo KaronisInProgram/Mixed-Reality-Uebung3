@@ -10,9 +10,10 @@
     <script src="https://unpkg.com/aframe-environment-component/dist/aframe-environment-component.min.js"></script>
     <script src="index.js"></script>
 </head>
+
   <body>
     <a-scene stats xr-mode-ui="XRMode: xr"
-              webxr="requiredFeatures: hit-test;"
+              webxr="requiredFeatures: hit-test,local-floor;"
               ar-hit-test="target:#test;">
 
         <a-assets>
