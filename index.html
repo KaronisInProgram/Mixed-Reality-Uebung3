@@ -14,8 +14,8 @@
     <a-scene stats xr-mode-ui="XRMode: xr" background="color: #212" renderer="antialias: true" webxr="referenceSpaceType: local">
 
       <a-entity position="0 1.6 0" camera look-controls wasd-controls></a-entity>
-      <a-entity id="leftHand" laser-controls="hand: left" raycaster="objects: [mixin='box']"></a-entity>
-      <a-entity id="rightHand" laser-controls="hand: right" raycaster="objects: [mixin='box']; near: 5; far: 5" line="color: #118A7E"></a-entity>
+      <a-entity id="leftHand" laser-controls="hand: left" raycaster="objects: [mixin='box']; near: 20; far: 20"></a-entity>
+      <a-entity id="rightHand" laser-controls="hand: right" raycaster="objects: [mixin='box']; near: 0.2; far: 0.2" line="color: #118A7E"></a-entity>
 
       <a-light position="0 0.5 1" intensity="0.75"></a-light>
 
