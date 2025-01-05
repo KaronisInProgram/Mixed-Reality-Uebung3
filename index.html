@@ -14,17 +14,28 @@
   <body>
     <a-scene stats xr-mode-ui="XRMode: xr">
 
-        <a-entity laser-controls="hand: left" raycaster="lineColor: blue; lineOpacity: 0.5"></a-entity>
-        <a-entity laser-controls="hand: right" raycaster="lineColor: red; lineOpacity: 0.5"></a-entity>
+      <a-assets>
+        <a-mixin id="cube"
+                 controller-event-handler
+                 geometry="primitive: box; height: 0.30; width: 0.30; depth: 0.30"
+                 material="color: #EF2D5E;"></a-mixin>
+      </a-assets>
 
-        <a-cylinder id="test" position="0 1 1.5" radius="0.2" height="0.5" color="blue"></a-cylinder>
+      <a-entity laser-controls="hand: left" raycaster="lineColor: blue; lineOpacity: 0.5"></a-entity>
+      <a-entity laser-controls="hand: right" raycaster="lineColor: red; lineOpacity: 0.5"></a-entity>
 
-        <!-- Light Configuration -->
-        <a-light type="ambient" color="#445451"></a-light>
-        <a-light type="directional" light="castShadow:true;" position="5 20 -5" intensity="0.8"></a-light>
-        
-        <!-- Out of the box environment! -->
-        <a-entity hide-on-enter-ar environment="preset: forest; dressingAmount: 20" shadow="receive: true"></a-entity>
+      <a-entity id="cubes" position="0 0 -1.0">
+        <a-entity mixin="cube" position="0.5 1.5 0"></a-entity>
+        <a-entity mixin="cube" position="0 1.5 0"></a-entity>
+        <a-entity mixin="cube" position="-0.5 1.5 0"></a-entity>
+      </a-entity>
+
+      <!-- Light Configuration -->
+      <a-light type="ambient" color="#445451"></a-light>
+      <a-light type="directional" light="castShadow:true;" position="5 20 -5" intensity="0.8"></a-light>
+      
+      <!-- Out of the box environment! -->
+      <a-entity hide-on-enter-ar environment="preset: forest; dressingAmount: 20" shadow="receive: true"></a-entity>
 
     </a-scene>
   </body>
