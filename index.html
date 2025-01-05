@@ -12,22 +12,16 @@
 </head>
 
   <body>
-    <a-scene stats xr-mode-ui="XRMode: xr">
+    <a-scene stats xr-mode-ui="XRMode: xr" renderer="antialias: true" webxr="referenceSpaceType: local">
+      
+      <a-entity position="0 1.6 0" camera look-controls wasd-controls></a-entity>
 
-      <a-assets>
-        <a-mixin id="cube"
-                 controller-event-handler
-                 geometry="primitive: box; height: 0.30; width: 0.30; depth: 0.30"
-                 material="color: #EF2D5E;"></a-mixin>
-      </a-assets>
+      <a-entity id="leftHand" laser-controls="hand: left" raycaster="objects: [mixin='box']"></a-entity>
+      <a-entity id="rightHand" laser-controls="hand: right" raycaster="objects: [mixin='box']" line="color: #118A7E"></a-entity>
 
-      <a-entity laser-controls="hand: left" raycaster="lineColor: blue; lineOpacity: 0.5"></a-entity>
-      <a-entity laser-controls="hand: right" raycaster="lineColor: red; lineOpacity: 0.5"></a-entity>
-
-      <a-entity id="cubes" position="0 0 -1.0">
-        <a-entity mixin="cube" position="0.5 1.5 0"></a-entity>
-        <a-entity mixin="cube" position="0 1.5 0"></a-entity>
-        <a-entity mixin="cube" position="-0.5 1.5 0"></a-entity>
+      <a-entity position="0 -1.6 -10">
+        <a-mixin id="box" geometry="primitive: box" material="color: #FAFAFA" rotation="0 0 -35" scale="0.5 0.5 0.5" intersect-color-change shadow="cast: true; receive: false"></a-mixin>
+        <a-entity boxes></a-entity>
       </a-entity>
 
       <!-- Light Configuration -->
