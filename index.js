@@ -42,7 +42,16 @@ AFRAME.registerComponent('spawn-entity', {
       // Append the box element to the scene.
       self.el.sceneEl.appendChild(entity);
     });
-    
+
+    this.el.addEventListener('gripdown', function(e) {
+      
+      var intersectedElement = self.el.components.raycaster.intersectedEls[0];
+
+      if(intersectedElement != null)
+      {
+        self.el.sceneEl.removeChild(intersectedElement);
+      }
+    });
   }
 });
 
