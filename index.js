@@ -2,7 +2,7 @@ AFRAME.registerComponent('spawn-entity', {
   
   // Accept value for color or default to blue.
   schema: {
-    color: {type: 'color', default: 'blue'}
+    color: {type: 'color', default: 'white'}
   },
   
   // Init lifecycle method fires upon initialization of component.
@@ -19,14 +19,20 @@ AFRAME.registerComponent('spawn-entity', {
       // console.log(e.detail.intersection.point);
       
       // Create the box element (not yet added).
-      var entity = document.createElement('a-box');
+      var entity = document.createElement('a-sphere');
     
       // Set the color to the assigned value.
       entity.setAttribute('material', 'color', self.data.color);
+
+      // Set the radius to the assigned value.
+      entity.setAttribute('radius', 0.015);
       
       // Set the position of the box to the click intersection.
       // entity.setAttribute('position', e.detail.intersection.point);
-      let spawn_position = self.el.object3D.localToWorld(new THREE.Vector3( 0, 0, -1 ));
+
+      let raycaster_lineEndPosition = self.el.components.raycaster.lineData.end
+      let spawn_position = self.el.object3D.localToWorld(raycaster_lineEndPosition);
+
       entity.setAttribute('position', spawn_position);
 
       // Append the box element to the scene.
