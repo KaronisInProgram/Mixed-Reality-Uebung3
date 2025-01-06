@@ -7,12 +7,13 @@ AFRAME.registerComponent('spawn-entity', {
   
   // Init lifecycle method fires upon initialization of component.
   init: function() {
-    
+    console.log("Init spawn-entity for " + this.el.id);
+
     // Allows the use of "self" as "this" within the listener without binding.
     var self = this;
     
     // Add the click listener.
-    this.el.addEventListener('click', function(e) {
+    this.el.addEventListener('triggerdown', function(e) {
       
       // Log intersection points for our reference.
       // console.log(e.detail.intersection.point);
@@ -24,7 +25,9 @@ AFRAME.registerComponent('spawn-entity', {
       entity.setAttribute('material', 'color', self.data.color);
       
       // Set the position of the box to the click intersection.
-      entity.setAttribute('position', e.detail.intersection.point);
+      // entity.setAttribute('position', e.detail.intersection.point);
+      let spawn_position = self.el.object3D.localToWorld(new THREE.Vector3( 0, 0, -1 ));
+      entity.setAttribute('position', spawn_position);
 
       // Append the box element to the scene.
       self.el.sceneEl.appendChild(entity);
