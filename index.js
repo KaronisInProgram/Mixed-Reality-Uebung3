@@ -26,6 +26,10 @@ AFRAME.registerComponent('spawn-entity', {
 
       // Set the radius to the assigned value.
       entity.setAttribute('radius', 0.015);
+
+      // Mark as drawn object.
+      entity.classList.add('drawnObject');
+      entity.setAttribute('intersect-color-change', {});
       
       // Set the position of the box to the click intersection.
       // entity.setAttribute('position', e.detail.intersection.point);
@@ -37,7 +41,6 @@ AFRAME.registerComponent('spawn-entity', {
 
       // Append the box element to the scene.
       self.el.sceneEl.appendChild(entity);
-      
     });
     
   }
