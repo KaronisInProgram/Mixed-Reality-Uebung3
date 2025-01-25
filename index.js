@@ -1,26 +1,25 @@
-AFRAME.registerComponent('spawn-entity', {
-  
+import * as THREE from 'three';
+import { MeshLine, MeshLineMaterial, MeshLineRaycast } from 'three.meshline';
+
+AFRAME.registerComponent('draw-spawner', {
+
   // Accept value for color or default to blue.
   schema: {
     color: {type: 'color', default: 'white'}
   },
-  
+
   // Init lifecycle method fires upon initialization of component.
   init: function() {
     console.log("Init spawn-entity for " + this.el.id);
 
     // Allows the use of "self" as "this" within the listener without binding.
     var self = this;
+    var intersectedElement = null;
     
-    // Add the click listener.
-    this.el.addEventListener('triggerdown', function(e) {
-      
-      // Log intersection points for our reference.
-      // console.log(e.detail.intersection.point);
-      
+    let spawn_entity = () => {
       // Create the box element (not yet added).
       var entity = document.createElement('a-sphere');
-    
+
       // Set the color to the assigned value.
       entity.setAttribute('material', 'color', self.data.color);
 
@@ -30,9 +29,6 @@ AFRAME.registerComponent('spawn-entity', {
       // Mark as drawn object.
       entity.classList.add('drawnObject');
       entity.setAttribute('intersect-color-change', {});
-      
-      // Set the position of the box to the click intersection.
-      // entity.setAttribute('position', e.detail.intersection.point);
 
       let raycaster_lineEndPosition = self.el.components.raycaster.lineData.end
       let spawn_position = self.el.object3D.localToWorld(raycaster_lineEndPosition);
@@ -41,45 +37,50 @@ AFRAME.registerComponent('spawn-entity', {
 
       // Append the box element to the scene.
       self.el.sceneEl.appendChild(entity);
+    }
+
+    // Add the click listener.
+    this.el.addEventListener('triggerdown', function(e) {
+      
+      let intersectedElements = self.el.components.raycaster.intersectedEls;
+
+      if(intersectedElements.length == 0)
+      {
+        spawn_entity();
+        return;
+      }
+      
+      intersectedElement = intersectedElements[0].object3D;
+      self.el.object3D.attach(intersectedElement);
     });
 
     this.el.addEventListener('gripdown', function(e) {
       
-      var intersectedElement = self.el.components.raycaster.intersectedEls[0];
-
       if(intersectedElement != null)
       {
-        self.el.sceneEl.removeChild(intersectedElement);
+        self.el.sceneEl.object3D.attach(intersectedElement);
       }
     });
-  }
-});
+  },
 
-// Create boxes.
-AFRAME.registerComponent('boxes', {
-  init: function () {
-    var box;
-    var columns = 20;
-    var el = this.el;
-    var i;
-    var j;
-    var rows = 15;
+  update: function () {
+    var data = this.data;  // Component property values.
+    var el = this.el;  // Reference to the component's entity.
 
-    if (el.sceneEl.isMobile) {
-      columns = 10;
-      rows = 5;
-    };
+    console.log("update");
 
-    for (x = columns / -2; x < columns / 2; x++) {
-      for (y = 0.5; y < rows; y++) {
-        box = document.createElement('a-entity');
-        box.setAttribute('mixin', 'box');
-        box.setAttribute('position', {x: x * .6, y: y * .6, z: 1.5});
-        el.appendChild(box);
-      }
+    if (data.event) {
+      // This will log the `message` when the entity emits the `event`.
+      el.addEventListener(data.event, function () {
+        console.log(data.message);
+      });
+    } else {
+      // `event` not specified, just log the message.
+      console.log(data.message);
     }
   }
 });
+
 
 AFRAME.registerComponent('intersect-color-change', {
   init: function () {
@@ -88,11 +89,11 @@ AFRAME.registerComponent('intersect-color-change', {
     var initialColor = material.color;
     var self = this;
 
-    el.addEventListener('mousedown', function (evt) {
+    el.addEventListener('mousedown', function () {
       el.setAttribute('material', 'color', '#EF2D5E');
     });
 
-    el.addEventListener('mouseup', function (evt) {
+    el.addEventListener('mouseup', function () {
       el.setAttribute('material', 'color', self.isMouseEnter ? '#24CAFF' : initialColor);
     });
 
