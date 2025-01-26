@@ -70,15 +70,27 @@ AFRAME.registerComponent("stroke-spawner", {
       lockedObject = null;
     }
 
+    let deleteLockedDrawing = () => {
+
+      if(lockedObject === null)
+      {
+        return;
+      }
+      
+      lockedObject.parentNode.removeChild(lockedObject);
+      lockedObject = null;
+    }
+
     this.el.addEventListener("triggerdown", startDrawing);
     this.el.addEventListener("triggerup", stopDrawing);
     this.el.addEventListener("gripdown", lockDrawing);
     this.el.addEventListener("gripup", releaseLockedDrawing);
+    this.el.addEventListener("bbuttondown", deleteLockedDrawing);
+
+
+    
   },
 
-  update: function () {
-
-  },
 
   tick: function () {
 

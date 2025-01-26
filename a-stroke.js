@@ -70,7 +70,7 @@ AFRAME.registerComponent("stroke", {
     },
   
     remove: function () {
-        if (this.connectionMesh) this.el.removeObject3D("connectionMesh");
+        if (this.connectionMesh) this.el.removeObject3D("tubeMesh");
         if (this.startSphereMesh) this.el.removeObject3D("startSphereMesh");
         if (this.endSphereMesh) this.el.removeObject3D("endSphereMesh");
     },
@@ -91,7 +91,7 @@ AFRAME.registerComponent("stroke", {
             this.pathPositions.push(this.pathPositions[0]);
         }
     
-        const tubeCurve = new THREE.CatmullRomCurve3(this.pathPositions, false, "catmullrom", 0.1);
+        const tubeCurve = new THREE.CatmullRomCurve3(this.pathPositions);
         const tubeGeometry = new THREE.TubeGeometry(tubeCurve, data.segments, data.radius, data.radialSegments, false);
     
         if (!material) {
@@ -102,9 +102,9 @@ AFRAME.registerComponent("stroke", {
                 opacity: data.opacity
               });
         }
-    
-        this.connectionMesh = new THREE.Mesh(tubeGeometry, material.material);
-        this.el.setObject3D("connectionMesh", this.connectionMesh);
+
+        this.tubeMesh = new THREE.Mesh(tubeGeometry, material.material);
+        this.el.setObject3D("tubeMesh", this.tubeMesh);
 
         const sphereGeometry = new THREE.SphereGeometry(data.radius, 32, 16); 
 
