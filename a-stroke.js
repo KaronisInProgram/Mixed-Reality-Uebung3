@@ -1,0 +1,153 @@
+/**
+ * Repesents a stroke along a path.
+ *
+ * Source: https://github.com/c-frame/aframe-extras/blob/master/src/primitives/a-tube.js
+ */
+AFRAME.registerPrimitive("a-stroke", {
+    defaultComponents: {
+        stroke: {},
+    },
+    mappings: {
+        path:               "stroke.path",
+        segments:           "stroke.segments",
+        radius:             "stroke.radius",
+        "radial-segments":  "stroke.radialSegments",
+        color:              "stroke.color",
+        opacity:    	    "stroke.opacity"
+    }
+});
+  
+AFRAME.registerComponent("stroke", {
+    schema: {
+        path:             {default: []},
+        segments:         {default: 64},
+        radius:           {default: 1},
+        radialSegments:   {default: 16},    
+        
+        // Material.
+        color: {default: "#ffffff", type: "color"},
+        opacity: {default: 1}
+    },
+  
+    init: function () {
+        const self = this;
+        const el = self.el;
+        
+        this._convertPathToThreeJsPositions();
+
+        const initialColor = self.data.color;
+
+        el.addEventListener("mousedown", function () {
+          el.setAttribute("color", "#EF2D5E");
+        });
+    
+        el.addEventListener("mouseup", function () {
+          el.setAttribute("color", self.isMouseEnter ? "#24CAFF" : initialColor);
+        });
+    
+        el.addEventListener("mouseenter", function () {
+          el.setAttribute("color", "#24CAFF");
+          self.isMouseEnter = true;
+        });
+    
+        el.addEventListener("mouseleave", function () {
+          el.setAttribute("color", initialColor);
+          self.isMouseEnter = false;
+        });
+
+        this._customDraw();
+    },
+
+    update: function (oldData) {
+        if (!Object.keys(oldData).length) return;
+
+        if(oldData.path !== this.data.path)
+        {
+            this._convertPathToThreeJsPositions(this.data.path);
+        }
+
+        this._customDraw();
+    },
+  
+    remove: function () {
+        if (this.connectionMesh) this.el.removeObject3D("connectionMesh");
+        if (this.startSphereMesh) this.el.removeObject3D("startSphereMesh");
+        if (this.endSphereMesh) this.el.removeObject3D("endSphereMesh");
+    },
+
+    _customDraw: function() {
+        this.remove();
+
+        const el = this.el;
+        const data = this.data;
+        let material = el.components.material;
+  
+        if (!this.pathPositions.length) {
+            console.error("[a-stroke] `path` property expected but not found.");
+            return;
+        }
+
+        if (this.pathPositions.length === 1) {
+            this.pathPositions.push(this.pathPositions[0]);
+        }
+    
+        const tubeCurve = new THREE.CatmullRomCurve3(this.pathPositions, false, "catmullrom", 0.1);
+        const tubeGeometry = new THREE.TubeGeometry(tubeCurve, data.segments, data.radius, data.radialSegments, false);
+    
+        if (!material) {
+            material = {};
+            material.material = new THREE.MeshPhongMaterial({
+                color: data.color,
+                transparent: data.opacity < 1,
+                opacity: data.opacity
+              });
+        }
+    
+        this.connectionMesh = new THREE.Mesh(tubeGeometry, material.material);
+        this.el.setObject3D("connectionMesh", this.connectionMesh);
+
+        const sphereGeometry = new THREE.SphereGeometry(data.radius, 32, 16); 
+
+        this.startSphereMesh = new THREE.Mesh(sphereGeometry, material.material);
+        const startPosition = this.pathPositions[0];
+        this.startSphereMesh.position.set(startPosition.x, startPosition.y, startPosition.z);
+        this.el.setObject3D("startSphereMesh", this.startSphereMesh);
+
+        this.endSphereMesh = new THREE.Mesh(sphereGeometry, material.material);
+        const endPosition = this.pathPositions[this.pathPositions.length - 1];
+        this.endSphereMesh.position.set(endPosition.x, endPosition.y, endPosition.z);
+        this.el.setObject3D("endSphereMesh", this.endSphereMesh);
+    },
+
+    _convertPathToThreeJsPositions: function() {
+        this.pathPositions = this.data.path.map(function (point) {
+            point = point.split(" ");
+            return new THREE.Vector3(Number(point[0]), Number(point[1]), Number(point[2]));
+        });
+    },
+
+    _convertThreeJsPositionsToStringPath: function() {
+        this.data.path = this.pathPositions.map(function (point) {
+            return point.x + " " + point.y + " " + point.z;
+        });
+    },
+
+    addPathPosition: function(point) {
+        this.pathPositions.push(point);
+        this._convertThreeJsPositionsToStringPath()
+
+        this._customDraw();
+    },
+    
+    replaceLastPathPosition: function(point) {
+        this.pathPositions.pop();
+        this.pathPositions.push(point);
+        this._convertThreeJsPositionsToStringPath()
+
+        this._customDraw();
+    },
+
+    getPathPositions: function() {
+        return this.pathPositions;
+    }
+  });

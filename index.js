@@ -1,4 +1,4 @@
-AFRAME.registerComponent('draw-spawner', {
+AFRAME.registerComponent("stroke-spawner", {
   dependencies: ["raycaster", "line"],
 
   // Init lifecycle method fires upon initialization of component.
@@ -14,29 +14,27 @@ AFRAME.registerComponent('draw-spawner', {
     this.brushHeadPosition = new THREE.Vector3(-0.010, -0.04, -0.08);
     this.brushHead = new THREE.Vector3(-0.010, -0.04, -0.08);
 
-    const brushHead = document.createElement('a-sphere');
-    brushHead.setAttribute('material', 'color', "white");
-    brushHead.setAttribute('material', 'opacity', "0.25");
-    // brushHead.setAttribute('obb-collider', 'showColliders', "true");
+    const brushHead = document.createElement("a-sphere");
+    brushHead.setAttribute("material", "color", "white");
+    brushHead.setAttribute("material", "opacity", "0.25");
 
-    brushHead.setAttribute('radius', 0.01);
-    brushHead.setAttribute('position', this.brushHeadPosition.x + " " + this.brushHeadPosition.y + " " + this.brushHeadPosition.z);
+    brushHead.setAttribute("radius", 0.01);
+    brushHead.setAttribute("position", this.brushHeadPosition.x + " " + this.brushHeadPosition.y + " " + this.brushHeadPosition.z);
     this.brushHead = brushHead;
 
     self.el.appendChild(brushHead);
 
     let startDrawing = () => {
-      const stroke = document.createElement('a-stroke');
-      stroke.classList.add('drawnObject');
+      const stroke = document.createElement("a-stroke");
+      stroke.classList.add("drawnObject");
 
-      // stroke.setAttribute('obb-collider', 'showColliders', "true");
-      stroke.setAttribute('color', "white");
-      stroke.setAttribute('radius', 0.01);
+      stroke.setAttribute("color", "white");
+      stroke.setAttribute("radius", 0.01);
 
-      const spawnPosition = self.el.object3D.localToWorld(self.el.components.raycaster.lineData.end);
-      stroke.setAttribute('path', spawnPosition.x + " " + spawnPosition.y + " " + spawnPosition.z);
+      const spawnPosition = self.el.object3D.localToWorld(self.el.components.raycaster.lineData.end.clone());
+      stroke.setAttribute("path", spawnPosition.x + " " + spawnPosition.y + " " + spawnPosition.z);
  
-      stroke.setAttribute('intersect-color-change', {});
+      stroke.setAttribute("intersect-color-change", {});
 
       self.el.sceneEl.appendChild(stroke);
 
@@ -72,14 +70,10 @@ AFRAME.registerComponent('draw-spawner', {
       lockedObject = null;
     }
 
-    this.el.addEventListener('triggerdown', startDrawing);
-    this.el.addEventListener('triggerup', stopDrawing);
-    this.el.addEventListener('gripdown', lockDrawing);
-    this.el.addEventListener('gripup', releaseLockedDrawing);
-
-    // self.el.sceneEl.addEventListener('enter-vr', setSpawnPreview);
-    // self.el.sceneEl.addEventListener('enter-ar', setSpawnPreview);
-
+    this.el.addEventListener("triggerdown", startDrawing);
+    this.el.addEventListener("triggerup", stopDrawing);
+    this.el.addEventListener("gripdown", lockDrawing);
+    this.el.addEventListener("gripup", releaseLockedDrawing);
   },
 
   update: function () {
@@ -88,22 +82,21 @@ AFRAME.registerComponent('draw-spawner', {
 
   tick: function () {
 
-    if(this.activeDrawing) {
-      const nextPosition = this.el.object3D.localToWorld(this.brushHead.object3D.position.clone());
-      const nextStrokePosition = nextPosition.x + " " + nextPosition.y + " " + nextPosition.z;
+    if(this.activeDrawing && this.activeStrokeElement.hasLoaded) {
+      const nextPosition = this.brushHead.object3D.position.clone()
+      this.el.object3D.localToWorld(nextPosition);
 
-      let path = this.activeStrokeElement.getAttribute('path');
-      const pathPositions = path.split(", ");
-      
-      const lastPathPosition = pathPositions[pathPositions.length - 1];
+      const strokeComponent = this.activeStrokeElement.components.stroke;
+      const pathPositions = strokeComponent.getPathPositions();      
+      const lastFixPathPosition = pathPositions[pathPositions.length - 2];
 
-      console.log("last " + lastPathPosition);
-      console.log("next " + nextStrokePosition);
-
-      if(nextStrokePosition !== lastPathPosition) 
+      if(nextPosition.distanceTo(lastFixPathPosition) >= 0.01 ) 
       {
-          path = path + ", " + nextStrokePosition;
-          this.activeStrokeElement.setAttribute('path', path);
+        strokeComponent.addPathPosition(nextPosition);
+      }
+      else
+      {
+        strokeComponent.replaceLastPathPosition(nextPosition);
       }
     }
   }
