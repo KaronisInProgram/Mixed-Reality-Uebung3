@@ -1,110 +1,122 @@
-import * as THREE from 'three';
-import { MeshLine, MeshLineMaterial, MeshLineRaycast } from 'three.meshline';
-
 AFRAME.registerComponent('draw-spawner', {
-
-  // Accept value for color or default to blue.
-  schema: {
-    color: {type: 'color', default: 'white'}
-  },
+  dependencies: ["raycaster", "line"],
 
   // Init lifecycle method fires upon initialization of component.
   init: function() {
     console.log("Init spawn-entity for " + this.el.id);
 
     // Allows the use of "self" as "this" within the listener without binding.
-    var self = this;
-    var intersectedElement = null;
-    
-    let spawn_entity = () => {
-      // Create the box element (not yet added).
+    const self = this;
+
+    let lockedObject = null;
+    this.activeStrokeElement = null;
+    this.activeDrawing = false;
+
+    let setSpawnPreview = () => {
+      const raycaster_lineEndPosition = this.el.components.line.data.end;
+
       var entity = document.createElement('a-sphere');
-
-      // Set the color to the assigned value.
-      entity.setAttribute('material', 'color', self.data.color);
-
-      // Set the radius to the assigned value.
+      entity.setAttribute('material', 'color', "white");
       entity.setAttribute('radius', 0.015);
-
-      // Mark as drawn object.
-      entity.classList.add('drawnObject');
-      entity.setAttribute('intersect-color-change', {});
-
-      let raycaster_lineEndPosition = self.el.components.raycaster.lineData.end
-      let spawn_position = self.el.object3D.localToWorld(raycaster_lineEndPosition);
-
-      entity.setAttribute('position', spawn_position);
-
-      // Append the box element to the scene.
-      self.el.sceneEl.appendChild(entity);
+      entity.setAttribute('position', raycaster_lineEndPosition);
+      self.el.appendChild(entity);
     }
 
-    // Add the click listener.
-    this.el.addEventListener('triggerdown', function(e) {
-      
-      let intersectedElements = self.el.components.raycaster.intersectedEls;
+    let createAndSetNewStroke = () => {
 
-      if(intersectedElements.length == 0)
+      const stroke = document.createElement('a-stroke');
+      stroke.classList.add('drawnObject');
+
+      stroke.setAttribute('color', "white");
+      stroke.setAttribute('radius', 0.015);
+
+      const spawnPosition = self.el.object3D.localToWorld(self.el.components.raycaster.lineData.end);
+      stroke.setAttribute('path', spawnPosition.x + " " + spawnPosition.y + " " + spawnPosition.z);
+ 
+      stroke.setAttribute('intersect-color-change', {});
+
+      self.el.sceneEl.appendChild(stroke);
+
+      return stroke;
+    }
+
+    let startDrawing = () => {
+      const intersectedElements = self.el.components.raycaster.intersectedEls;
+
+      if(intersectedElements.length === 0)
       {
-        spawn_entity();
+        const spawnedStroke = createAndSetNewStroke();
+        this.activeStrokeElement = spawnedStroke;
+        this.activeDrawing = true;
+
         return;
       }
       
-      intersectedElement = intersectedElements[0].object3D;
-      self.el.object3D.attach(intersectedElement);
-    });
+      this.activeStrokeElement = intersectedElements[0];
+      this.activeDrawing = true;
+    }
 
-    this.el.addEventListener('gripdown', function(e) {
-      
-      if(intersectedElement != null)
+    let stopDrawing = () => {
+      this.activeDrawing = false;
+      this.activeStrokeElement = null;
+    }
+
+    let lockDrawing = () => {
+      const intersectedElements = self.el.components.raycaster.intersectedEls;
+
+      if(intersectedElements.length === 0)
       {
-        self.el.sceneEl.object3D.attach(intersectedElement);
+        return;
       }
-    });
+      
+      lockedObject = intersectedElements[0].object3D;
+      self.el.object3D.attach(lockedObject);
+    }
+
+    let releaseLockedDrawing = () => {
+
+      if(lockedObject === null)
+      {
+        return;
+      }
+      
+      self.el.sceneEl.object3D.attach(lockedObject);
+      lockedObject = null;
+    }
+
+    this.el.addEventListener('triggerdown', startDrawing);
+    this.el.addEventListener('triggerup', stopDrawing);
+    this.el.addEventListener('gripdown', lockDrawing);
+    this.el.addEventListener('gripup', releaseLockedDrawing);
+
+    self.el.sceneEl.addEventListener('enter-vr', setSpawnPreview);
+    self.el.sceneEl.addEventListener('enter-ar', setSpawnPreview);
+
   },
 
   update: function () {
-    var data = this.data;  // Component property values.
-    var el = this.el;  // Reference to the component's entity.
 
-    console.log("update");
+  },
 
-    if (data.event) {
-      // This will log the `message` when the entity emits the `event`.
-      el.addEventListener(data.event, function () {
-        console.log(data.message);
-      });
-    } else {
-      // `event` not specified, just log the message.
-      console.log(data.message);
+  tick: function () {
+
+    if(this.activeDrawing) {
+      const nextPosition = this.el.object3D.localToWorld(this.el.components.raycaster.lineData.end);
+      const nextStrokePosition = nextPosition.x + " " + nextPosition.y + " " + nextPosition.z;
+
+      let path = this.activeStrokeElement.getAttribute('path');
+      const pathPositions = path.split(", ");
+      
+      const lastPathPosition = pathPositions[pathPositions.length - 1];
+
+      console.log("last " + lastPathPosition);
+      console.log("next " + nextStrokePosition);
+
+      if(nextStrokePosition !== lastPathPosition) 
+      {
+          path = path + ", " + nextStrokePosition;
+          this.activeStrokeElement.setAttribute('path', path);
+      }
     }
-  }
-});
-
-
-AFRAME.registerComponent('intersect-color-change', {
-  init: function () {
-    var el = this.el;
-    var material = el.getAttribute('material');
-    var initialColor = material.color;
-    var self = this;
-
-    el.addEventListener('mousedown', function () {
-      el.setAttribute('material', 'color', '#EF2D5E');
-    });
-
-    el.addEventListener('mouseup', function () {
-      el.setAttribute('material', 'color', self.isMouseEnter ? '#24CAFF' : initialColor);
-    });
-
-    el.addEventListener('mouseenter', function () {
-      el.setAttribute('material', 'color', '#24CAFF');
-      self.isMouseEnter = true;
-    });
-
-    el.addEventListener('mouseleave', function () {
-      el.setAttribute('material', 'color', initialColor);
-      self.isMouseEnter = false;
-    });
   }
 });

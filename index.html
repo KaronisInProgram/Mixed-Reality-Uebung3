@@ -7,6 +7,7 @@
     <meta name="description" content="Abgabe für den Kurs Mixed-Reality an der HTW im Wintersemester 2024/2025" />
 
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+    <script src="a-drawing.js"></script>
     <script src="index.js"></script>
 </head>
 
@@ -16,21 +17,15 @@
       <a-entity position="0 1.6 0" camera look-controls wasd-controls></a-entity>
       <a-entity id="leftHand" laser-controls="hand: left" raycaster="near: 20; far: 20">
       </a-entity>
-      <a-entity id="rightHand" draw-spawner laser-controls="hand: right" raycaster="objects: .drawnObject; near: 0.01; far: 0.05" line="color: #118A7E">
-        <a-sphere color="white" radius="0.015" position="-0.012 -0.06 -0.1" material="opacity: 0.25; transparent: true"></a-sphere>
+      <a-entity id="rightHand" draw-spawner laser-controls="hand: right" raycaster="objects: .drawnObject; near: 0.02; far: 0.05" line="color: #118A7E">
+        <!-- <a-sphere color="white" radius="0.015" position="-0.012 -0.06 -0.1" material="opacity: 0.25; transparent: true"></a-sphere> -->
       </a-entity>
 
       <a-light position="0 0.5 1" intensity="0.75"></a-light>
 
       <a-entity position="0 -1.6 -10">
-
         <a-circle hide-on-enter-ar rotation="-90 0 0" radius="20" color="#666" position="0 -0.1 0" shadow="receive: true" roughness="1"></a-circle>
-
         <a-light hide-on-enter-ar type="point" position="0 10 -30" intensity="0.85"></a-light>
-
-        <a-torus hide-on-enter-ar radius="20" arc="190" rotation="0 90 0" animation="property: rotation; to: 0 450 0; loop: true; dur: 16000; easing: linear"></a-torus>
-        <a-torus hide-on-enter-ar radius="20" arc="190" rotation="0 45 0" animation="property: rotation; to: 0 405 0; loop: true; dur: 16000; easing: linear"></a-torus>
-        <a-torus hide-on-enter-ar radius="20" arc="190" rotation="0 135 0" animation="property: rotation; to: 0 495 0; dir: reverse; loop: true; dur: 16000; easing: linear"></a-torus>
         <a-torus hide-on-enter-ar radius="20" arc="360" rotation="-90 0 0"></a-torus>
       </a-entity>
     </a-scene>
