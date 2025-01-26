@@ -12,19 +12,24 @@ AFRAME.registerComponent('draw-spawner', {
     this.activeStrokeElement = null;
     this.activeDrawing = false;
     this.brushHeadPosition = new THREE.Vector3(-0.010, -0.04, -0.08);
+    this.brushHead = new THREE.Vector3(-0.010, -0.04, -0.08);
 
-    var entity = document.createElement('a-sphere');
-    entity.setAttribute('material', 'color', "white");
-    entity.setAttribute('material', 'opacity', "0.25");
-    entity.setAttribute('radius', 0.01);
-    entity.setAttribute('position', this.brushHeadPosition.x + " " + this.brushHeadPosition.y + " " + this.brushHeadPosition.z);
+    const brushHead = document.createElement('a-sphere');
+    brushHead.setAttribute('material', 'color', "white");
+    brushHead.setAttribute('material', 'opacity', "0.25");
+    // brushHead.setAttribute('obb-collider', 'showColliders', "true");
 
-    self.el.appendChild(entity);
+    brushHead.setAttribute('radius', 0.01);
+    brushHead.setAttribute('position', this.brushHeadPosition.x + " " + this.brushHeadPosition.y + " " + this.brushHeadPosition.z);
+    this.brushHead = brushHead;
+
+    self.el.appendChild(brushHead);
 
     let startDrawing = () => {
       const stroke = document.createElement('a-stroke');
       stroke.classList.add('drawnObject');
 
+      // stroke.setAttribute('obb-collider', 'showColliders', "true");
       stroke.setAttribute('color', "white");
       stroke.setAttribute('radius', 0.01);
 
@@ -84,7 +89,7 @@ AFRAME.registerComponent('draw-spawner', {
   tick: function () {
 
     if(this.activeDrawing) {
-      const nextPosition = this.el.object3D.localToWorld(this.el.components.raycaster.lineData.end);
+      const nextPosition = this.el.object3D.localToWorld(this.brushHead.object3D.position.clone());
       const nextStrokePosition = nextPosition.x + " " + nextPosition.y + " " + nextPosition.z;
 
       let path = this.activeStrokeElement.getAttribute('path');
