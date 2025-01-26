@@ -11,24 +11,22 @@ AFRAME.registerComponent('draw-spawner', {
     let lockedObject = null;
     this.activeStrokeElement = null;
     this.activeDrawing = false;
+    this.brushHeadPosition = new THREE.Vector3(-0.010, -0.04, -0.08);
 
-    let setSpawnPreview = () => {
-      const raycaster_lineEndPosition = this.el.components.line.data.end;
+    var entity = document.createElement('a-sphere');
+    entity.setAttribute('material', 'color', "white");
+    entity.setAttribute('material', 'opacity', "0.25");
+    entity.setAttribute('radius', 0.01);
+    entity.setAttribute('position', this.brushHeadPosition.x + " " + this.brushHeadPosition.y + " " + this.brushHeadPosition.z);
 
-      var entity = document.createElement('a-sphere');
-      entity.setAttribute('material', 'color', "white");
-      entity.setAttribute('radius', 0.015);
-      entity.setAttribute('position', raycaster_lineEndPosition);
-      self.el.appendChild(entity);
-    }
+    self.el.appendChild(entity);
 
-    let createAndSetNewStroke = () => {
-
+    let startDrawing = () => {
       const stroke = document.createElement('a-stroke');
       stroke.classList.add('drawnObject');
 
       stroke.setAttribute('color', "white");
-      stroke.setAttribute('radius', 0.015);
+      stroke.setAttribute('radius', 0.01);
 
       const spawnPosition = self.el.object3D.localToWorld(self.el.components.raycaster.lineData.end);
       stroke.setAttribute('path', spawnPosition.x + " " + spawnPosition.y + " " + spawnPosition.z);
@@ -37,22 +35,7 @@ AFRAME.registerComponent('draw-spawner', {
 
       self.el.sceneEl.appendChild(stroke);
 
-      return stroke;
-    }
-
-    let startDrawing = () => {
-      const intersectedElements = self.el.components.raycaster.intersectedEls;
-
-      if(intersectedElements.length === 0)
-      {
-        const spawnedStroke = createAndSetNewStroke();
-        this.activeStrokeElement = spawnedStroke;
-        this.activeDrawing = true;
-
-        return;
-      }
-      
-      this.activeStrokeElement = intersectedElements[0];
+      this.activeStrokeElement = stroke;
       this.activeDrawing = true;
     }
 
@@ -89,8 +72,8 @@ AFRAME.registerComponent('draw-spawner', {
     this.el.addEventListener('gripdown', lockDrawing);
     this.el.addEventListener('gripup', releaseLockedDrawing);
 
-    self.el.sceneEl.addEventListener('enter-vr', setSpawnPreview);
-    self.el.sceneEl.addEventListener('enter-ar', setSpawnPreview);
+    // self.el.sceneEl.addEventListener('enter-vr', setSpawnPreview);
+    // self.el.sceneEl.addEventListener('enter-ar', setSpawnPreview);
 
   },
 
