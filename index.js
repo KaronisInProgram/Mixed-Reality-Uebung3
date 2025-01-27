@@ -121,7 +121,13 @@ AFRAME.registerComponent("stroke-spawner", {
         return;
       }
       
-      lockedElement = intersectedElements[0];
+      let intersectionElement = intersectedElements[0];
+      if(intersectionElement.className !== "drawnObject")
+      {
+        return;
+      }
+
+      lockedElement = intersectionElement;
       self.el.object3D.attach(lockedElement.object3D);
     }
 
