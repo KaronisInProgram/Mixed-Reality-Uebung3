@@ -39,6 +39,7 @@ AFRAME.registerComponent("stroke", {
 
         el.addEventListener("mouseenter", function () {
             let drawableObjects = document.getElementsByClassName("drawnObject");
+            el.setAttribute("active", true);
 
             for (const element of drawableObjects) {
                 if(!element.components.stroke.data.active)
@@ -46,9 +47,6 @@ AFRAME.registerComponent("stroke", {
                     element.setAttribute("opacity", "0.75")
                 }
             }
-
-            el.setAttribute("active", true);
-            el.setAttribute("opacity", "1");
         });
     
         el.addEventListener("mouseleave", function () {
