@@ -12,18 +12,44 @@ AFRAME.registerComponent("stroke-spawner", {
     this.activeDrawing = false;
 
     this.brushHeadPosition = new THREE.Vector3(-0.010, -0.04, -0.08);
-    this.brushHeadRadius = 0.01;
-    this.brushHeadColor = "red";
+    this.initBrushHeadRadius = 0.01;
+    this.initBrushHeadColor = "white";
+    this.brushHeadRadius = this.initBrushHeadRadius;
+    this.brushHeadColor = this.initBrushHeadColor;
     this.brushHead = null;
 
     this.ThumbstickOrientation = "Upright";
 
     this.lastModeIndex = -1;
-    this.modes = ["draw", "paint", "grab"];
+    this.modes = ["draw", "paint"];
     this.mode = "draw";
 
+    let initializeModeSpecificEventListeners = () => {
+      if(this.mode === "draw")
+        {
+          this.el.removeEventListener("triggerdown", paintDrawing);
+          this.el.addEventListener("triggerdown", startDrawing);
+          this.el.addEventListener("triggerup", stopDrawing);
+        }
+  
+        if(this.mode === "paint")
+        {
+          this.el.removeEventListener("triggerdown", startDrawing);
+          this.el.removeEventListener("triggerup", stopDrawing);
+          this.el.addEventListener("triggerdown", paintDrawing);
+        }
+    }
+    
+    let resetBrushHead = () => {
+      this.brushHeadRadius = this.initBrushHeadRadius;
+      this.brushHeadColor = this.initBrushHeadColor;
+
+      removeBrushHead()
+      spawnBrushHead();
+    }
+
     let spawnBrushHead = () => {
-      if(this.brushHead === null)
+      if(this.brushHead !== null)
       {
         return;
       }
@@ -36,6 +62,16 @@ AFRAME.registerComponent("stroke-spawner", {
       this.brushHead = brushHead;
   
       self.el.appendChild(brushHead);
+    }
+
+    let removeBrushHead = () => {
+      if(this.brushHead === null)
+      {
+        return;
+      }
+
+      this.brushHead.object3D.parent.remove(this.brushHead.object3D);
+      this.brushHead = null
     }
 
     let startDrawing = () => {
@@ -59,6 +95,22 @@ AFRAME.registerComponent("stroke-spawner", {
     let stopDrawing = () => {
       this.activeDrawing = false;
       this.activeStrokeElement = null;
+    }
+
+    let paintDrawing = () => {
+      const intersectedElements = self.el.components.raycaster.intersectedEls;
+      if(intersectedElements.length === 0)
+      {
+        return;
+      }
+
+      let intersectionElement = intersectedElements[0];
+      if(intersectionElement.className !== "drawnObject")
+      {
+        return;
+      }
+
+      intersectionElement.setAttribute("color", this.brushHeadColor);
     }
 
     let lockDrawing = () => {
@@ -103,33 +155,41 @@ AFRAME.registerComponent("stroke-spawner", {
       else { this.ThumbstickOrientation = "Upright"}
     }
     
-    let changeLockedDrawingColor = () => {
-      if(lockedElement === null)
+    let changeCursorMode = () => {
+      this.lastModeIndex = (this.lastModeIndex + 1) % this.modes.length;
+      this.mode = this.modes[this.lastModeIndex];
+
+      initializeModeSpecificEventListeners();
+      resetBrushHead();
+    }
+
+    let changeBrushColor = (evt) => {
+      let intersectionElement = evt.detail.els[0];
+
+      if(intersectionElement.className !== "colorSelection")
       {
         return;
       }
 
-      lastColorIndex = (lastColorIndex + 1) % colors.length;
-      lockedElement.setAttribute( "color", colors[lastColorIndex]);
+      this.brushHeadColor = intersectionElement.components.material.data.color;
+
+      removeBrushHead();
+      spawnBrushHead();
     }
 
-    let changeCursorMode = () => {
-      this.lastModeIndex = (this.lastModeIndex + 1) % this.modes.length;
-      this.mode = this.modes[this.lastModeIndex];
-    }
-
-    this.el.addEventListener("triggerdown", startDrawing);
-    this.el.addEventListener("triggerup", stopDrawing);
+    this.el.addEventListener('raycaster-intersection', changeBrushColor);
     this.el.addEventListener("gripdown", lockDrawing);
     this.el.addEventListener("gripup", releaseLockedDrawing);
     this.el.addEventListener("bbuttondown", deleteLockedDrawing);
     this.el.addEventListener("abuttondown", changeCursorMode);
     this.el.addEventListener("thumbstickmoved", logThumbstick);
+    initializeModeSpecificEventListeners();
+
+    spawnBrushHead();
   },
 
   tick: function (time, timeDelta) {
     this._scaleBrushHead(timeDelta);
-
     this._updateStroke();
   },
 
@@ -154,28 +214,16 @@ AFRAME.registerComponent("stroke-spawner", {
   },
 
   _scaleBrushHead: function (timeDelta) {
-    if(!this.activeDrawing && this.ThumbstickOrientation === "RIGHT" && this.brushHeadRadius < 0.04) {
+    if(this.mode === "draw" && !this.activeDrawing && this.ThumbstickOrientation === "RIGHT" && this.brushHeadRadius < 0.04) {
       const scalingFactor = 0.00005 * timeDelta;
       this.brushHeadRadius = Math.min(0.04, (this.brushHeadRadius + scalingFactor));
       this.brushHead.setAttribute("radius", this.brushHeadRadius);
     }
     
-    if(!this.activeDrawing && this.ThumbstickOrientation === "LEFT" && this.brushHeadRadius > 0.005) {
+    if(this.mode === "draw" && !this.activeDrawing && this.ThumbstickOrientation === "LEFT" && this.brushHeadRadius > 0.005) {
       const scalingFactor = -(0.00005 * timeDelta);
       this.brushHeadRadius = Math.max(0.005, (this.brushHeadRadius + scalingFactor));
       this.brushHead.setAttribute("radius", this.brushHeadRadius);
     }
-  }
-});
-
-// Component to change to a sequential color on click.
-AFRAME.registerComponent("cursor-listener", {
-  init: function () {
-
-    this.el.addEventListener("click", function (evt) {
-      lastIndex = (lastIndex + 1) % COLORS.length;
-      this.setAttribute("material", "color", COLORS[lastIndex]);
-      console.log("I was clicked at: ", evt.detail.intersection.point);
-    });
   }
 });

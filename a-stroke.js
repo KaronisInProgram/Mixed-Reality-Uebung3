@@ -35,30 +35,15 @@ AFRAME.registerComponent("stroke", {
         
         this._convertPathToThreeJsPositions();
 
-        const initialColor = self.data.color;
+        this.initialColor = self.data.color;
 
-        el.addEventListener("obbcollisionstarted", function (evt) {
-            console.log("collide Test");
-          });
-
-
-        // el.addEventListener("mousedown", function () {
-        //   el.setAttribute("color", "#EF2D5E");
-        // });
-        
-        // el.addEventListener("mouseup", function () {
-        //   el.setAttribute("color", self.isMouseEnter ? "#24CAFF" : initialColor);
-        // });
+        el.addEventListener("mouseenter", function (evt) {
+          el.setAttribute("color", "#24CAFF");
+        });
     
-        // el.addEventListener("mouseenter", function () {
-        //   el.setAttribute("color", "#24CAFF");
-        //   self.isMouseEnter = true;
-        // });
-    
-        // el.addEventListener("mouseleave", function () {
-        //   el.setAttribute("color", initialColor);
-        //   self.isMouseEnter = false;
-        // });
+        el.addEventListener("mouseleave", function (evt) {
+          el.setAttribute("color", this.initialColor);
+        });
 
         this._customDraw();
     },
