@@ -156,11 +156,23 @@ AFRAME.registerComponent("stroke-spawner", {
     }
     
     let changeCursorMode = () => {
+
+      if (lockedElement !== null && this.activeStrokeElement !== null)
+      {
+        return;
+      }
+
       this.lastModeIndex = (this.lastModeIndex + 1) % this.modes.length;
       this.mode = this.modes[this.lastModeIndex];
 
       initializeModeSpecificEventListeners();
       resetBrushHead();
+    }
+
+    let showCursorMode = () => {
+      let modeView = document.getElementById("modeView");
+      modeView.setAttribute("value", "Mode: " + this.mode)
+
     }
 
     let changeBrushColor = (evt) => {
@@ -182,10 +194,12 @@ AFRAME.registerComponent("stroke-spawner", {
     this.el.addEventListener("gripup", releaseLockedDrawing);
     this.el.addEventListener("bbuttondown", deleteLockedDrawing);
     this.el.addEventListener("abuttondown", changeCursorMode);
+    this.el.addEventListener("abuttonup", showCursorMode);
     this.el.addEventListener("thumbstickmoved", logThumbstick);
     initializeModeSpecificEventListeners();
 
     spawnBrushHead();
+    showCursorMode();
   },
 
   tick: function (time, timeDelta) {

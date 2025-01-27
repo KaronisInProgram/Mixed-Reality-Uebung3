@@ -12,6 +12,7 @@ AFRAME.registerPrimitive("a-stroke", {
         segments:           "stroke.segments",
         radius:             "stroke.radius",
         "radial-segments":  "stroke.radialSegments",
+        active:             "stroke.active",
         color:              "stroke.color",
         opacity:    	    "stroke.opacity"
     }
@@ -22,7 +23,8 @@ AFRAME.registerComponent("stroke", {
         path:             {default: []},
         segments:         {default: 64},
         radius:           {default: 1},
-        radialSegments:   {default: 16},    
+        radialSegments:   {default: 16}, 
+        active:           {default: false},    
         
         // Material.
         color: {default: "white", type: "color"},
@@ -35,14 +37,31 @@ AFRAME.registerComponent("stroke", {
         
         this._convertPathToThreeJsPositions();
 
-        let baseOpacity = self.data.opacity;
+        el.addEventListener("mouseenter", function () {
+            let drawableObjects = document.getElementsByClassName("drawnObject");
 
-        el.addEventListener("mouseenter", function (evt) {
-          el.setAttribute("opacity", "0.75");
+            for (const element of drawableObjects) {
+                if(!element.components.stroke.data.active)
+                {
+                    element.setAttribute("opacity", "0.75")
+                }
+            }
+
+            el.setAttribute("active", true);
+            el.setAttribute("opacity", "1");
         });
     
-        el.addEventListener("mouseleave", function (evt) {
-          el.setAttribute("opacity",  baseOpacity);
+        el.addEventListener("mouseleave", function () {
+            let drawableObjects = document.getElementsByClassName("drawnObject");
+
+            for (const element of drawableObjects) {
+                if(!element.components.stroke.data.active)
+                {
+                    element.setAttribute("opacity", "1")
+                }
+            }
+
+            el.setAttribute("active", false);
         });
 
         this._customDraw();
@@ -96,7 +115,7 @@ AFRAME.registerComponent("stroke", {
         this.tubeMesh = new THREE.Mesh(tubeGeometry, material.material);
         this.el.setObject3D("tubeMesh", this.tubeMesh);
 
-        const sphereGeometry = new THREE.SphereGeometry(data.radius, 32, 16); 
+        const sphereGeometry = new THREE.SphereGeometry(data.radius - 0.00001, 32, 16); 
 
         this.startSphereMesh = new THREE.Mesh(sphereGeometry, material.material);
         const startPosition = this.pathPositions[0];

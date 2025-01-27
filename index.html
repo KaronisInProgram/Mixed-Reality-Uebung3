@@ -16,17 +16,19 @@
       <a-entity position="0 1.6 0" camera look-controls wasd-controls></a-entity>
       <a-entity id="leftHand" laser-controls="hand: left" raycaster="showLine: true; lineColor: #118A7E; lineOpacity: 0; near: 0; far: 0" >
         <a-plane rotation="-50 0 0" position="0 0 -0.25" width="0.3" height="0.3" material="color: black; opacity: 0.4">
-          <a-text value="Color Selection" position="0.0 0.1 0.01" scale="2 2 2" align="center" width="0.3" height="0.3" material="color: white"></a-text>
-          <a-plane class="colorSelection" position="0.1 -0.1 0.01" width="0.05" height="0.05" material="color: red;"></a-plane>
-          <a-plane class="colorSelection" position="0.1 0.0 0.01" width="0.05" height="0.05" material="color: green;"></a-plane>
-          <a-plane class="colorSelection" position="0.0 0.0 0.01" width="0.05" height="0.05" material="color: blue;"></a-plane>
-          <a-plane class="colorSelection" position="-0.1 0.0 0.01" width="0.05" height="0.05" material="color: white;"></a-plane>
-          <a-plane class="colorSelection" position="-0.1 -0.1 0.01" width="0.05" height="0.05" material="color: black;"></a-plane>
-          <a-plane class="colorSelection" position="0.0 -0.1 0.01" width="0.05" height="0.05" material="color: yellow;"></a-plane>
+          <a-text value="Color Selection" position="0.0 0.1 0.001" scale="2 2 2" align="center" width="0.3" height="0.3" material="color: white"></a-text>
+          <a-plane class="colorSelection" position="0.1 -0.1 0.001" width="0.05" height="0.05" material="color: red;"></a-plane>
+          <a-plane class="colorSelection" position="0.1 0.0 0.001" width="0.05" height="0.05" material="color: green;"></a-plane>
+          <a-plane class="colorSelection" position="0.0 0.0 0.001" width="0.05" height="0.05" material="color: blue;"></a-plane>
+          <a-plane class="colorSelection" position="-0.1 0.0 0.001" width="0.05" height="0.05" material="color: white;"></a-plane>
+          <a-plane class="colorSelection" position="-0.1 -0.1 0.001" width="0.05" height="0.05" material="color: black;"></a-plane>
+          <a-plane class="colorSelection" position="0.0 -0.1 0.001" width="0.05" height="0.05" material="color: yellow;"></a-plane>
         </a-plane>
 
       </a-entity>
-      <a-entity id="rightHand" stroke-spawner laser-controls="hand: right" raycaster="objects: .drawnObject, .colorSelection; showLine: true; lineColor: #118A7E; lineOpacity: 0.1; near: 0.015; far: 0.04"></a-entity>
+      <a-entity id="rightHand" stroke-spawner laser-controls="hand: right" raycaster="objects: .drawnObject, .colorSelection; showLine: true; lineColor: #118A7E; lineOpacity: 0.1; near: 0.015; far: 0.04">
+        <a-text id="modeView" rotation="-50 -10 10" value="Mode: " position="0.0.5 0.1 -0.1" scale="2 2 2" align="center" width="0.3" height="0.3" material="color: white"></a-text>
+      </a-entity>
       <a-light position="0 0.5 1" intensity="0.75"></a-light>
 
       <a-entity position="0 -1.6 -10">
