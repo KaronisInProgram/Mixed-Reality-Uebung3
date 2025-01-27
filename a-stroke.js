@@ -25,7 +25,7 @@ AFRAME.registerComponent("stroke", {
         radialSegments:   {default: 16},    
         
         // Material.
-        color: {default: "#ffffff", type: "color"},
+        color: {default: "white", type: "color"},
         opacity: {default: 1}
     },
   
@@ -37,23 +37,28 @@ AFRAME.registerComponent("stroke", {
 
         const initialColor = self.data.color;
 
-        el.addEventListener("mousedown", function () {
-          el.setAttribute("color", "#EF2D5E");
-        });
+        el.addEventListener("obbcollisionstarted", function (evt) {
+            console.log("collide Test");
+          });
+
+
+        // el.addEventListener("mousedown", function () {
+        //   el.setAttribute("color", "#EF2D5E");
+        // });
+        
+        // el.addEventListener("mouseup", function () {
+        //   el.setAttribute("color", self.isMouseEnter ? "#24CAFF" : initialColor);
+        // });
     
-        el.addEventListener("mouseup", function () {
-          el.setAttribute("color", self.isMouseEnter ? "#24CAFF" : initialColor);
-        });
+        // el.addEventListener("mouseenter", function () {
+        //   el.setAttribute("color", "#24CAFF");
+        //   self.isMouseEnter = true;
+        // });
     
-        el.addEventListener("mouseenter", function () {
-          el.setAttribute("color", "#24CAFF");
-          self.isMouseEnter = true;
-        });
-    
-        el.addEventListener("mouseleave", function () {
-          el.setAttribute("color", initialColor);
-          self.isMouseEnter = false;
-        });
+        // el.addEventListener("mouseleave", function () {
+        //   el.setAttribute("color", initialColor);
+        //   self.isMouseEnter = false;
+        // });
 
         this._customDraw();
     },

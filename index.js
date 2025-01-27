@@ -1,5 +1,4 @@
 AFRAME.registerComponent("stroke-spawner", {
-  dependencies: ["raycaster", "line"],
 
   // Init lifecycle method fires upon initialization of component.
   init: function() {
@@ -8,17 +7,20 @@ AFRAME.registerComponent("stroke-spawner", {
     // Allows the use of "self" as "this" within the listener without binding.
     const self = this;
 
-    let lockedObject = null;
+    let lockedElement = null;
     this.activeStrokeElement = null;
     this.activeDrawing = false;
+
     this.brushHeadPosition = new THREE.Vector3(-0.010, -0.04, -0.08);
-    this.brushHead = new THREE.Vector3(-0.010, -0.04, -0.08);
+    this.brushHeadRadius = 0.01;
+    this.brushHeadColor = "red";
+
+    this.ThumbstickOrientation = "Upright";
 
     const brushHead = document.createElement("a-sphere");
-    brushHead.setAttribute("material", "color", "white");
+    brushHead.setAttribute("material", "color", this.brushHeadColor);
     brushHead.setAttribute("material", "opacity", "0.25");
-
-    brushHead.setAttribute("radius", 0.01);
+    brushHead.setAttribute("radius", this.brushHeadRadius);
     brushHead.setAttribute("position", this.brushHeadPosition.x + " " + this.brushHeadPosition.y + " " + this.brushHeadPosition.z);
     this.brushHead = brushHead;
 
@@ -28,13 +30,14 @@ AFRAME.registerComponent("stroke-spawner", {
       const stroke = document.createElement("a-stroke");
       stroke.classList.add("drawnObject");
 
-      stroke.setAttribute("color", "white");
-      stroke.setAttribute("radius", 0.01);
+      stroke.setAttribute("color", this.brushHeadColor);
+      stroke.setAttribute("radius", this.brushHeadRadius);
 
       const spawnPosition = self.el.object3D.localToWorld(self.el.components.raycaster.lineData.end.clone());
       stroke.setAttribute("path", spawnPosition.x + " " + spawnPosition.y + " " + spawnPosition.z);
  
       stroke.setAttribute("intersect-color-change", {});
+      // stroke.setAttribute("obb-collider", {});
 
       self.el.sceneEl.appendChild(stroke);
 
@@ -55,30 +58,38 @@ AFRAME.registerComponent("stroke-spawner", {
         return;
       }
       
-      lockedObject = intersectedElements[0].object3D;
-      self.el.object3D.attach(lockedObject);
+      lockedElement = intersectedElements[0];
+      self.el.object3D.attach(lockedElement.object3D);
     }
 
     let releaseLockedDrawing = () => {
 
-      if(lockedObject === null)
+      if(lockedElement === null)
       {
         return;
       }
       
-      self.el.sceneEl.object3D.attach(lockedObject);
-      lockedObject = null;
+      self.el.sceneEl.object3D.attach(lockedElement.object3D);
+      lockedElement = null;
     }
 
     let deleteLockedDrawing = () => {
 
-      if(lockedObject === null)
+      if(lockedElement === null)
       {
         return;
       }
       
-      lockedObject.parentNode.removeChild(lockedObject);
-      lockedObject = null;
+      lockedElement.object3D.parent.remove(lockedElement.object3D);
+      lockedElement = null;
+    }
+
+    let logThumbstick = (evt) => {
+      if (evt.detail.y > 0.95) { this.ThumbstickOrientation = "DOWN"; }
+      else if (evt.detail.y < -0.95) { this.ThumbstickOrientation = "UP"; }
+      else if (evt.detail.x < -0.95) { this.ThumbstickOrientation = "LEFT"; }
+      else if (evt.detail.x > 0.95) { this.ThumbstickOrientation = "RIGHT"; }
+      else { this.ThumbstickOrientation = "Upright"}
     }
 
     this.el.addEventListener("triggerdown", startDrawing);
@@ -86,14 +97,16 @@ AFRAME.registerComponent("stroke-spawner", {
     this.el.addEventListener("gripdown", lockDrawing);
     this.el.addEventListener("gripup", releaseLockedDrawing);
     this.el.addEventListener("bbuttondown", deleteLockedDrawing);
-
-
-    
+    this.el.addEventListener('thumbstickmoved', logThumbstick);
   },
 
+  tick: function (time, timeDelta) {
+    this._scaleBrushHead(timeDelta);
 
-  tick: function () {
+    this._updateStroke();
+  },
 
+  _updateStroke: function () {
     if(this.activeDrawing && this.activeStrokeElement.hasLoaded) {
       const nextPosition = this.brushHead.object3D.position.clone()
       this.el.object3D.localToWorld(nextPosition);
@@ -111,5 +124,33 @@ AFRAME.registerComponent("stroke-spawner", {
         strokeComponent.replaceLastPathPosition(nextPosition);
       }
     }
+  },
+
+  _scaleBrushHead: function (timeDelta) {
+    if(!this.activeDrawing && this.ThumbstickOrientation === "RIGHT" && this.brushHeadRadius <= 0.05) {
+      const scalingFactor = this.brushHeadRadius * 0.005 * timeDelta;
+      this.brushHeadRadius += scalingFactor;
+      this.brushHead.setAttribute("radius", this.brushHeadRadius);
+    }
+    
+    if(!this.activeDrawing && this.ThumbstickOrientation === "LEFT" && this.brushHeadRadius >= 0.005) {
+      const scalingFactor = -(this.brushHeadRadius * 0.005 * timeDelta);
+      this.brushHeadRadius += scalingFactor;
+      this.brushHead.setAttribute("radius", this.brushHeadRadius);
+    }
+  }
+});
+
+
+// Component to change to a sequential color on click.
+AFRAME.registerComponent('cursor-listener', {
+  init: function () {
+    var lastIndex = -1;
+    var COLORS = ['red', 'green', 'blue'];
+    this.el.addEventListener('click', function (evt) {
+      lastIndex = (lastIndex + 1) % COLORS.length;
+      this.setAttribute('material', 'color', COLORS[lastIndex]);
+      console.log('I was clicked at: ', evt.detail.intersection.point);
+    });
   }
 });
