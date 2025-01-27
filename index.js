@@ -222,7 +222,7 @@ AFRAME.registerComponent("stroke-spawner", {
       const pathPositions = strokeComponent.getPathPositions();      
       const lastFixPathPosition = pathPositions[pathPositions.length - 2];
 
-      if(nextPosition.distanceTo(lastFixPathPosition) >= 0.01 ) 
+      if(nextPosition.distanceTo(lastFixPathPosition) >= 0.02 ) 
       {
         strokeComponent.addPathPosition(nextPosition);
       }

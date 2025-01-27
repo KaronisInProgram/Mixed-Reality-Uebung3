@@ -42,24 +42,25 @@ AFRAME.registerComponent("stroke", {
             el.setAttribute("active", true);
 
             for (const element of drawableObjects) {
-                if(!element.components.stroke.data.active)
-                {
+
                     element.setAttribute("opacity", "0.65")
-                }
+
             }
+            
+            el.setAttribute("opacity", "1")
         });
     
         el.addEventListener("mouseleave", function () {
             let drawableObjects = document.getElementsByClassName("drawnObject");
+            el.setAttribute("active", false);
 
             for (const element of drawableObjects) {
-                if(!element.components.stroke.data.active)
-                {
+
                     element.setAttribute("opacity", "1")
-                }
+
             }
 
-            el.setAttribute("active", false);
+            el.setAttribute("opacity", "1")
         });
 
         this._customDraw();
