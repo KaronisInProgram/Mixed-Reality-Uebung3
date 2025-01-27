@@ -35,14 +35,14 @@ AFRAME.registerComponent("stroke", {
         
         this._convertPathToThreeJsPositions();
 
-        this.initialColor = self.data.color;
+        let baseOpacity = self.data.opacity;
 
         el.addEventListener("mouseenter", function (evt) {
-          el.setAttribute("color", "#24CAFF");
+          el.setAttribute("opacity", "0.75");
         });
     
         el.addEventListener("mouseleave", function (evt) {
-          el.setAttribute("color", this.initialColor);
+          el.setAttribute("opacity",  baseOpacity);
         });
 
         this._customDraw();
