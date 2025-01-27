@@ -127,7 +127,7 @@ AFRAME.registerComponent("stroke-spawner", {
   },
 
   _scaleBrushHead: function (timeDelta) {
-    if(!this.activeDrawing && this.ThumbstickOrientation === "RIGHT" && this.brushHeadRadius <= 0.05) {
+    if(!this.activeDrawing && this.ThumbstickOrientation === "RIGHT" && this.brushHeadRadius <= 0.04) {
       const scalingFactor = this.brushHeadRadius * 0.005 * timeDelta;
       this.brushHeadRadius += scalingFactor;
       this.brushHead.setAttribute("radius", this.brushHeadRadius);
