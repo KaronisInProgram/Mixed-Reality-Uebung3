@@ -14,17 +14,29 @@ AFRAME.registerComponent("stroke-spawner", {
     this.brushHeadPosition = new THREE.Vector3(-0.010, -0.04, -0.08);
     this.brushHeadRadius = 0.01;
     this.brushHeadColor = "red";
+    this.brushHead = null;
 
     this.ThumbstickOrientation = "Upright";
 
-    const brushHead = document.createElement("a-sphere");
-    brushHead.setAttribute("material", "color", this.brushHeadColor);
-    brushHead.setAttribute("material", "opacity", "0.25");
-    brushHead.setAttribute("radius", this.brushHeadRadius);
-    brushHead.setAttribute("position", this.brushHeadPosition.x + " " + this.brushHeadPosition.y + " " + this.brushHeadPosition.z);
-    this.brushHead = brushHead;
+    this.lastModeIndex = -1;
+    this.modes = ["draw", "paint", "grab"];
+    this.mode = "draw";
 
-    self.el.appendChild(brushHead);
+    let spawnBrushHead = () => {
+      if(this.brushHead === null)
+      {
+        return;
+      }
+
+      const brushHead = document.createElement("a-sphere");
+      brushHead.setAttribute("material", "color", this.brushHeadColor);
+      brushHead.setAttribute("material", "opacity", "0.25");
+      brushHead.setAttribute("radius", this.brushHeadRadius);
+      brushHead.setAttribute("position", this.brushHeadPosition.x + " " + this.brushHeadPosition.y + " " + this.brushHeadPosition.z);
+      this.brushHead = brushHead;
+  
+      self.el.appendChild(brushHead);
+    }
 
     let startDrawing = () => {
       const stroke = document.createElement("a-stroke");
@@ -37,7 +49,6 @@ AFRAME.registerComponent("stroke-spawner", {
       stroke.setAttribute("path", spawnPosition.x + " " + spawnPosition.y + " " + spawnPosition.z);
  
       stroke.setAttribute("intersect-color-change", {});
-      // stroke.setAttribute("obb-collider", {});
 
       self.el.sceneEl.appendChild(stroke);
 
@@ -91,13 +102,29 @@ AFRAME.registerComponent("stroke-spawner", {
       else if (evt.detail.x > 0.95) { this.ThumbstickOrientation = "RIGHT"; }
       else { this.ThumbstickOrientation = "Upright"}
     }
+    
+    let changeLockedDrawingColor = () => {
+      if(lockedElement === null)
+      {
+        return;
+      }
+
+      lastColorIndex = (lastColorIndex + 1) % colors.length;
+      lockedElement.setAttribute( "color", colors[lastColorIndex]);
+    }
+
+    let changeCursorMode = () => {
+      this.lastModeIndex = (this.lastModeIndex + 1) % this.modes.length;
+      this.mode = this.modes[this.lastModeIndex];
+    }
 
     this.el.addEventListener("triggerdown", startDrawing);
     this.el.addEventListener("triggerup", stopDrawing);
     this.el.addEventListener("gripdown", lockDrawing);
     this.el.addEventListener("gripup", releaseLockedDrawing);
     this.el.addEventListener("bbuttondown", deleteLockedDrawing);
-    this.el.addEventListener('thumbstickmoved', logThumbstick);
+    this.el.addEventListener("abuttondown", changeCursorMode);
+    this.el.addEventListener("thumbstickmoved", logThumbstick);
   },
 
   tick: function (time, timeDelta) {
@@ -127,30 +154,28 @@ AFRAME.registerComponent("stroke-spawner", {
   },
 
   _scaleBrushHead: function (timeDelta) {
-    if(!this.activeDrawing && this.ThumbstickOrientation === "RIGHT" && this.brushHeadRadius <= 0.04) {
-      const scalingFactor = this.brushHeadRadius * 0.005 * timeDelta;
-      this.brushHeadRadius += scalingFactor;
+    if(!this.activeDrawing && this.ThumbstickOrientation === "RIGHT" && this.brushHeadRadius < 0.04) {
+      const scalingFactor = 0.00005 * timeDelta;
+      this.brushHeadRadius = Math.min(0.04, (this.brushHeadRadius + scalingFactor));
       this.brushHead.setAttribute("radius", this.brushHeadRadius);
     }
     
-    if(!this.activeDrawing && this.ThumbstickOrientation === "LEFT" && this.brushHeadRadius >= 0.005) {
-      const scalingFactor = -(this.brushHeadRadius * 0.005 * timeDelta);
-      this.brushHeadRadius += scalingFactor;
+    if(!this.activeDrawing && this.ThumbstickOrientation === "LEFT" && this.brushHeadRadius > 0.005) {
+      const scalingFactor = -(0.00005 * timeDelta);
+      this.brushHeadRadius = Math.max(0.005, (this.brushHeadRadius + scalingFactor));
       this.brushHead.setAttribute("radius", this.brushHeadRadius);
     }
   }
 });
 
-
 // Component to change to a sequential color on click.
-AFRAME.registerComponent('cursor-listener', {
+AFRAME.registerComponent("cursor-listener", {
   init: function () {
-    var lastIndex = -1;
-    var COLORS = ['red', 'green', 'blue'];
-    this.el.addEventListener('click', function (evt) {
+
+    this.el.addEventListener("click", function (evt) {
       lastIndex = (lastIndex + 1) % COLORS.length;
-      this.setAttribute('material', 'color', COLORS[lastIndex]);
-      console.log('I was clicked at: ', evt.detail.intersection.point);
+      this.setAttribute("material", "color", COLORS[lastIndex]);
+      console.log("I was clicked at: ", evt.detail.intersection.point);
     });
   }
 });
