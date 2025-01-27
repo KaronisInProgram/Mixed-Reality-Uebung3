@@ -44,7 +44,7 @@ AFRAME.registerComponent("stroke", {
             for (const element of drawableObjects) {
                 if(!element.components.stroke.data.active)
                 {
-                    element.setAttribute("opacity", "0.75")
+                    element.setAttribute("opacity", "0.65")
                 }
             }
         });
